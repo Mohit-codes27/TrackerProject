@@ -7,6 +7,7 @@ import authRoutes from "./modules/auth/auth.routes";
 import codingRoutes from "./modules/coding/coding.routes";
 import projectRoutes from "./modules/projects/projects.routes";
 import analyticsRoutes from "./modules/analytics/analytics.routes";
+import dashboardRoutes from "./modules/dashboard/dashboard.routes";
 
 const app = express();
 
@@ -24,10 +25,11 @@ app.get("/health", (req, res) => {
 });
 
 //routes
-app.use("/auth", authRoutes);
-app.use("/coding", codingRoutes);
-app.use("/projects", projectRoutes);
-app.use("/analytics", analyticsRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/coding", codingRoutes);
+app.use("/api/projects", projectRoutes);
+app.use("/api/analytics", analyticsRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 //Error handlern
 app.use(errorHandler);
