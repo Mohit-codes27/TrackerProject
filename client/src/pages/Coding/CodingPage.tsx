@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../../api/axios";
 
@@ -23,6 +23,7 @@ const emptyForm = {
   problemLink: "",
   difficulty: "Easy",
   topic: "",
+  description: "",
   timeSpentMinutes: "",
   attempts: "1",
   solvedAt: new Date().toISOString().slice(0, 16),
@@ -36,11 +37,18 @@ const CodingPage = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [formError, setFormError] = useState("");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["coding-logs", page, platform, difficulty],
     queryFn: async () => {
-      const res = await api.get(`/coding?page=${page}&limit=10`);
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: "10",
+        ...(platform !== "All" && { platform }),
+        ...(difficulty !== "All" && { difficulty }),
+      })
+      const res = await api.get(`/coding?${params}`);
       return res.data.data ?? { logs: [], total: 0, pages: 1 };
     },
   });
@@ -77,18 +85,23 @@ const CodingPage = () => {
       attempts: Number(form.attempts),
       solvedAt: new Date(form.solvedAt).toISOString(),
       problemLink: form.problemLink || undefined,
+      description: form.description || undefined,
     });
   };
+
+  const handlePlatformChange = (p: string) => {
+    setPlatform(p);
+    setPage(1);
+  }
+
+  const handleDifficultyChange = (d: string) => {
+    setDifficulty(d);
+    setPage(1);
+  }
 
   const logs = data?.logs ?? [];
   const pages = data?.pages ?? 1;
   const total = data?.total ?? 0;
-
-  const filtered = logs.filter((l: any) => {
-    if (platform !== "All" && l.platform !== platform) return false;
-    if (difficulty !== "All" && l.difficulty !== difficulty) return false;
-    return true;
-  });
 
   return (
     <div className="flex flex-col h-full">
@@ -115,12 +128,11 @@ const CodingPage = () => {
         {PLATFORMS.map((p) => (
           <button
             key={p}
-            onClick={() => setPlatform(p)}
-            className={`text-[11px] px-2.5 py-1 rounded border transition-colors ${
-              platform === p
-                ? "bg-[#1e1e28] border-[#3a3a4e] text-[#a09df5]"
-                : "border-[#2a2a2e] text-[#555560] hover:text-[#888896]"
-            }`}
+            onClick={() => handlePlatformChange(p)}
+            className={`text-[11px] px-2.5 py-1 rounded border transition-colors ${platform === p
+              ? "bg-[#1e1e28] border-[#3a3a4e] text-[#a09df5]"
+              : "border-[#2a2a2e] text-[#555560] hover:text-[#888896]"
+              }`}
           >
             {p}
           </button>
@@ -130,12 +142,11 @@ const CodingPage = () => {
         {DIFFICULTIES.map((d) => (
           <button
             key={d}
-            onClick={() => setDifficulty(d)}
-            className={`text-[11px] px-2.5 py-1 rounded border transition-colors ${
-              difficulty === d
-                ? "bg-[#1e1e28] border-[#3a3a4e] text-[#a09df5]"
-                : "border-[#2a2a2e] text-[#555560] hover:text-[#888896]"
-            }`}
+            onClick={() => handleDifficultyChange(d)}
+            className={`text-[11px] px-2.5 py-1 rounded border transition-colors ${difficulty === d
+              ? "bg-[#1e1e28] border-[#3a3a4e] text-[#a09df5]"
+              : "border-[#2a2a2e] text-[#555560] hover:text-[#888896]"
+              }`}
           >
             {d}
           </button>
@@ -146,7 +157,7 @@ const CodingPage = () => {
       <div className="flex-1 overflow-y-auto">
         {isLoading ? (
           <div className="flex items-center justify-center h-40 text-[#555560] text-sm">Loading...</div>
-        ) : filtered.length === 0 ? (
+        ) : logs.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-40 gap-2">
             <i className="ti ti-code text-[#2a2a2e] text-3xl" />
             <p className="text-[#555560] text-sm">No logs found. Add your first one.</p>
@@ -164,16 +175,25 @@ const CodingPage = () => {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((log: any) => (
-                <tr key={log.id} className="border-b border-[#1e1e22] hover:bg-[#111114] transition-colors group">
-                  <td className="px-5 py-3">
-                    <div className="text-[13px] text-[#c8c8d4]">{log.problemName}</div>
+              {logs.map((log: any) => (
+                <React.Fragment key={log.id}>
+                <tr className="border-b border-[#1e1e22] hover:bg-[#111114] transition-colors group">
+                  <td className="px-5 py-3 cursor-pointer" onClick={() => setExpandedId(expandedId === log.id ? null : log.id)}>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[13px] text-[#c8c8d4]">{log.problemName}</span>
+                      {log.description && (
+                        <i className={`ti ti-chevron-${expandedId === log.id ? "up" : "down"} text-[#444450] text-xs`} />
+                      )}
+                    </div>
                     {log.problemLink && (
-                      <a href={log.problemLink} target="_blank" rel="noreferrer" className="text-[11px] text-[#444450] hover:text-[#a09df5]">
+                      <a href={log.problemLink} target="_blank" rel="noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-[11px] text-[#444450] hover:text-[#a09df5]">
                         view problem ↗
                       </a>
                     )}
                   </td>
+
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-1.5">
                       <div className={`w-1.5 h-1.5 rounded-full ${platformDot(log.platform)}`} />
@@ -205,11 +225,20 @@ const CodingPage = () => {
                     </button>
                   </td>
                 </tr>
+
+                {expandedId === log.id && log.description && (
+                  <tr className="border-b border-[#1e1e22] bg-[#0d0d0f]">
+                    <td colSpan={7} className="px-5 py-3">
+                      <p className="text-[12px] text-[#666672] leading-relaxed">{log.description}</p>
+                    </td>
+                  </tr>
+                )}
+                </React.Fragment>
               ))}
             </tbody>
           </table>
         )}
-      </div>
+      </div>j
 
       {/* Pagination */}
       {pages > 1 && (
@@ -229,11 +258,10 @@ const CodingPage = () => {
               <button
                 key={p}
                 onClick={() => setPage(p)}
-                className={`w-7 h-7 rounded border text-[12px] transition-colors ${
-                  p === page
-                    ? "bg-[#1e1e28] border-[#3a3a4e] text-[#a09df5]"
-                    : "border-[#2a2a2e] text-[#555560] hover:text-[#c8c8d4]"
-                }`}
+                className={`w-7 h-7 rounded border text-[12px] transition-colors ${p === page
+                  ? "bg-[#1e1e28] border-[#3a3a4e] text-[#a09df5]"
+                  : "border-[#2a2a2e] text-[#555560] hover:text-[#c8c8d4]"
+                  }`}
               >
                 {p}
               </button>
@@ -263,7 +291,8 @@ const CodingPage = () => {
             </div>
 
             {/* Drawer Form */}
-            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-4">
+            <form onSubmit={handleSubmit} className="flex-1 flex flex-col h-full min-h-0">
+              <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-4">
               {formError && (
                 <div className="px-3 py-2 rounded bg-[#2a0a0a] border border-[#4a1a1a] text-[#E24B4A] text-[12px]">
                   {formError}
@@ -325,6 +354,19 @@ const CodingPage = () => {
                 />
               </div>
 
+              <div>
+                <label className="block text-[12px] text-[#888896] mb-1.5">
+                  Description <span className="text-[#444450]">(optional)</span>
+                </label>
+                <textarea
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  placeholder="What approach did you use? Any notes?"
+                  rows={3}
+                  className="w-full bg-[#0d0d0f] border border-[#2a2a2e] rounded-md px-3 py-2 text-[13px] text-[#e8e8ec] placeholder-[#444450] focus:outline-none focus:border-[#7F77DD] transition-colors resize-none"
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[12px] text-[#888896] mb-1.5">Time (minutes)</label>
@@ -362,24 +404,26 @@ const CodingPage = () => {
                   className="w-full bg-[#0d0d0f] border border-[#2a2a2e] rounded-md px-3 py-2 text-[13px] text-[#e8e8ec] focus:outline-none focus:border-[#7F77DD] transition-colors"
                 />
               </div>
-            </form>
+              </div>
 
-            {/* Drawer Footer */}
-            <div className="px-5 py-4 border-t border-[#2a2a2e] flex gap-2">
-              <button
-                onClick={() => setDrawerOpen(false)}
-                className="flex-1 py-2 rounded-md border border-[#2a2a2e] text-[13px] text-[#888896] hover:text-[#c8c8d4] transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSubmit}
-                disabled={createMutation.isPending}
-                className="flex-1 py-2 rounded-md bg-[#7F77DD] text-white text-[13px] font-medium hover:bg-[#6e67cc] transition-colors disabled:opacity-50"
-              >
-                {createMutation.isPending ? "Saving..." : "Save Log"}
-              </button>
-            </div>
+              {/* Drawer Footer */}
+              <div className="px-5 py-4 border-t border-[#2a2a2e] flex gap-2 flex-shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setDrawerOpen(false)}
+                  className="flex-1 py-2 rounded-md border border-[#2a2a2e] text-[13px] text-[#888896] hover:text-[#c8c8d4] transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={createMutation.isPending}
+                  className="flex-1 py-2 rounded-md bg-[#7F77DD] text-white text-[13px] font-medium hover:bg-[#6e67cc] transition-colors disabled:opacity-50"
+                >
+                  {createMutation.isPending ? "Saving..." : "Save Log"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

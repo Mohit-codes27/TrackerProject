@@ -1,6 +1,6 @@
 import {db} from "../../db";
 import {codingLogs} from "../../db/schema";
-import {eq, and, desc} from "drizzle-orm";
+import {eq, and, desc, ilike, SQL} from "drizzle-orm";
 import {CreateCodingLogInput, UpdateCodingLogInput} from "./coding.schema";
 
 export const createCodingLog = async(userId: string, data: CreateCodingLogInput) =>{
@@ -16,19 +16,31 @@ export const createCodingLog = async(userId: string, data: CreateCodingLogInput)
     return log;
 };
 
-export const getCodingLogs = async(userId: string, page: number, limit: number)=>{
+export const getCodingLogs = async(userId: string, page: number, limit: number, filters:{ platform?: string; difficulty?: string})=>{
     const skip = (page-1)*limit;
+
+    const conditions: SQL[] = [eq(codingLogs.userId, userId)];
+
+    if(filters.platform && filters.platform !== "All"){
+        conditions.push(eq(codingLogs.platform, filters.platform as any));
+    }
+
+    if(filters.difficulty && filters.difficulty !== "All"){
+        conditions.push(eq(codingLogs.difficulty, filters.difficulty as any));
+    }
+
+    const whereClause = and(...conditions);
 
     const logs = await db
     .select()
     .from(codingLogs)
-    .where(eq(codingLogs.userId, userId))
+    .where(whereClause)
     .orderBy(desc(codingLogs.solvedAt))
     .limit(limit)
     .offset(skip);
 
     const [{count}] = await db
-    .select({count: db.$count(codingLogs, eq(codingLogs.userId, userId))})
+    .select({count: db.$count(codingLogs, whereClause)})
     .from(codingLogs);
 
     const total = Number(count);

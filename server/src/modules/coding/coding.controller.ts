@@ -14,7 +14,9 @@ export const createLog = asyncHandler(async(req: Request, res: Response)=>{
 export const getLogs = asyncHandler(async(req: Request, res: Response)=>{
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 10;
-    const result = await getCodingLogs(req.user!.id, page, limit);
+    const platform = req.query.platform as string || "All";
+    const difficulty = req.query.difficulty as string || "All";
+    const result = await getCodingLogs(req.user!.id, page, limit, {platform, difficulty});
     res.status(200).json({
         success: true,
         message:"Coding logs fetched successfully",

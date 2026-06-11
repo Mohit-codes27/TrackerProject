@@ -25,6 +25,7 @@ export const codingLogs = pgTable("coding_logs", {
   problemLink: varchar("problem_link", { length: 500 }),
   difficulty: difficultyEnum("difficulty").notNull(),
   topic: varchar("topic", { length: 100 }).notNull(),
+  description: text("description"),
   timeSpentMinutes: integer("time_spent_minutes").notNull(),
   attempts: integer("attempts").notNull().default(1),
   solvedAt: timestamp("solved_at").notNull(),

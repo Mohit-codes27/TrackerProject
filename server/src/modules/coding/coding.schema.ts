@@ -6,6 +6,7 @@ export const createCodingLogSchema = z.object({
     problemLink: z.string().url().optional(),
     difficulty: z.enum(["Easy", "Medium", "Hard"]),
     topic: z.string().min(1, "Topic is required"),
+    description: z.string().optional(),
     timeSpentMinutes: z.number().int().min(1, "Time must be at least 1 minute"),
     attempts: z.number().int().min(1, "Attempts must be at least 1"),
     solvedAt: z.string().datetime(),
