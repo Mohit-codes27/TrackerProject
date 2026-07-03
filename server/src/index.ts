@@ -25,11 +25,11 @@ app.get("/health", (req, res) => {
 });
 
 //routes
-app.use("/api/auth", authRoutes);
-app.use("/api/coding", codingRoutes);
-app.use("/api/projects", projectRoutes);
-app.use("/api/analytics", analyticsRoutes);
-app.use("/api/dashboard", dashboardRoutes);
+app.use("/auth", authRoutes);
+app.use("/coding", codingRoutes);
+app.use("/projects", projectRoutes);
+app.use("/analytics", analyticsRoutes);
+app.use("/dashboard", dashboardRoutes);
 
 //Error handlern
 app.use(errorHandler);
