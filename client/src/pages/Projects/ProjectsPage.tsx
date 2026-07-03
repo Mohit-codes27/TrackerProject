@@ -1,4 +1,4 @@
-import { useState, Fragment } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../../api/axios";
 import { useToast } from "../../hooks/useToast";
@@ -366,7 +366,7 @@ const ProjectsPage = () => {
                   </button>
                 </div>
                 <div className="flex flex-col gap-4">
-                  {milestones.length > 0 ? milestones.map((m, i) => (
+                  {milestones.length > 0 ? milestones.map((m: any, i: number) => (
                     <div key={i} className="flex items-start gap-3">
                       <div className="flex flex-col items-center">
                         <div className="w-3 h-3 rounded-full flex-shrink-0 mt-0.5 border-2"
