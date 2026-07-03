@@ -35,7 +35,8 @@ export const loginUser = async(data: LoginInput) => {
     .where(eq(users.email, email))
     .limit(1);
 
-    if(!user) throw new Error("Invalid email or password");
+    console.log("I'm working")
+    if(!user) throw new Error("Invalid User!!!");
 
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if(!isMatch) throw new Error("Invalid email or password");
