@@ -1,102 +1,118 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom";
 import api from "../../api/axios";
 
 const RegisterPage = () => {
-    const navigate = useNavigate();
-    const [form, setForm] = useState({ name: "", email: "", password: ""});
-    const [error, setError] = useState("");
-    const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError("");
-        setLoading(true);
-        try{
-            await api.post("/auth/register", form);
-            navigate("/");
-        }catch (err: any){
-            setError(err?.response?.data?.message || "Registration failed");
-        }finally{
-            setLoading(false);
-        }
-    };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      await api.post("/auth/register", form);
+      navigate("/");
+    } catch (err: any) {
+      setError(err?.response?.data?.message || "Registration failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return (
-    <div className="min-h-screen bg-[#0d0d0f] flex items-center justify-center px-4">
-      <div className="w-full max-w-sm">
+  return (
+    <div
+      className="min-h-screen flex items-center justify-center px-4"
+      style={{ background: "#0b1120" }}
+    >
+      <div className="w-full max-w-sm animate-scale-in">
         {/* Logo */}
-        <div className="flex items-center gap-2.5 mb-8 justify-center">
-          <div className="w-8 h-8 bg-[#7F77DD] rounded-lg flex items-center justify-center">
-            <i className="ti ti-terminal-2 text-white text-base" />
+        <div className="flex items-center gap-3 mb-8 justify-center">
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center"
+            style={{ background: "linear-gradient(135deg, #3b82f6, #7c6ff7)" }}
+          >
+            <i className="ti ti-rocket text-white text-lg" />
           </div>
-          <span className="text-lg font-medium text-[#e8e8ec]">DevTrack</span>
+          <span className="text-xl font-bold text-[#f1f5f9]">DevTrack</span>
         </div>
 
         {/* Card */}
-        <div className="bg-[#111114] border border-[#2a2a2e] rounded-xl p-6">
-          <h1 className="text-[15px] font-medium text-[#e8e8ec] mb-1">Create account</h1>
-          <p className="text-[13px] text-[#555560] mb-6">Start tracking your progress</p>
+        <div className="glass-card p-7">
+          <h1 className="text-[18px] font-semibold text-[#f1f5f9] mb-1">Create account</h1>
+          <p className="text-[13px] text-[#475569] mb-7">Start tracking your progress</p>
 
           {error && (
-            <div className="mb-4 px-3 py-2 rounded-md bg-[#2a0a0a] border border-[#4a1a1a] text-[#E24B4A] text-[12px]">
+            <div className="mb-5 px-4 py-2.5 rounded-xl bg-[rgba(239,68,68,0.08)] border border-[rgba(239,68,68,0.2)] text-[#ef4444] text-[12px] flex items-center gap-2">
+              <i className="ti ti-alert-circle text-sm" />
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             <div>
-              <label className="block text-[12px] text-[#888896] mb-1.5">Name</label>
+              <label className="block text-[12px] text-[#94a3b8] mb-2 font-medium">Name</label>
               <input
                 type="text"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="Mohit"
+                placeholder="Your name"
                 required
-                className="w-full bg-[#0d0d0f] border border-[#2a2a2e] rounded-md px-3 py-2 text-[13px] text-[#e8e8ec] placeholder-[#444450] focus:outline-none focus:border-[#7F77DD] transition-colors"
+                className="w-full bg-[#0c1020] border border-[#1e293b] rounded-xl px-4 py-2.5 text-[13px] text-[#f1f5f9] placeholder-[#475569] focus:border-[#3b82f6] transition-colors"
               />
             </div>
             <div>
-              <label className="block text-[12px] text-[#888896] mb-1.5">Email</label>
+              <label className="block text-[12px] text-[#94a3b8] mb-2 font-medium">Email</label>
               <input
                 type="email"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="mohit@example.com"
+                placeholder="email@example.com"
                 required
-                className="w-full bg-[#0d0d0f] border border-[#2a2a2e] rounded-md px-3 py-2 text-[13px] text-[#e8e8ec] placeholder-[#444450] focus:outline-none focus:border-[#7F77DD] transition-colors"
+                className="w-full bg-[#0c1020] border border-[#1e293b] rounded-xl px-4 py-2.5 text-[13px] text-[#f1f5f9] placeholder-[#475569] focus:border-[#3b82f6] transition-colors"
               />
             </div>
             <div>
-              <label className="block text-[12px] text-[#888896] mb-1.5">Password</label>
+              <label className="block text-[12px] text-[#94a3b8] mb-2 font-medium">Password</label>
               <input
                 type="password"
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
                 placeholder="••••••••"
                 required
-                className="w-full bg-[#0d0d0f] border border-[#2a2a2e] rounded-md px-3 py-2 text-[13px] text-[#e8e8ec] placeholder-[#444450] focus:outline-none focus:border-[#7F77DD] transition-colors"
+                className="w-full bg-[#0c1020] border border-[#1e293b] rounded-xl px-4 py-2.5 text-[13px] text-[#f1f5f9] placeholder-[#475569] focus:border-[#3b82f6] transition-colors"
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2 rounded-md bg-[#7F77DD] text-white text-[13px] font-medium hover:bg-[#6e67cc] transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-1"
+              className="w-full py-2.5 rounded-xl text-white text-[13px] font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-1
+                hover:shadow-[0_0_24px_rgba(59,130,246,0.3)]"
+              style={{ background: "linear-gradient(135deg, #3b82f6, #7c6ff7)" }}
             >
-              {loading ? "Creating account..." : "Create account"}
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <i className="ti ti-loader-2 animate-spin text-sm" />
+                  Creating account...
+                </span>
+              ) : (
+                "Create account"
+              )}
             </button>
           </form>
         </div>
 
-        <p className="text-center text-[12px] text-[#555560] mt-4">
+        <p className="text-center text-[13px] text-[#475569] mt-5">
           Already have an account?{" "}
-          <Link to="/login" className="text-[#a09df5] hover:text-[#7F77DD] transition-colors">
+          <Link to="/login" className="text-[#3b82f6] hover:text-[#2563eb] font-medium transition-colors">
             Sign in
           </Link>
         </p>
       </div>
     </div>
   );
-
 };
+
 export default RegisterPage;
